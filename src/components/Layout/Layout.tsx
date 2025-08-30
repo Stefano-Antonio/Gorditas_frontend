@@ -6,6 +6,7 @@ import NuevaOrden from '../../pages/NuevaOrden';
 +import GestionOrdenes from '../../pages/GestionOrdenes';
 
 const Layout: React.FC = () => {
+}
 @@ .. @@
             <Routes>
               <Route index element={<Dashboard />} />
