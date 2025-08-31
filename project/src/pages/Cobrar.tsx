@@ -55,7 +55,7 @@ const Cobrar: React.FC = () => {
         const ordenesMesa = ordenesArray.filter(
           (orden: Orden) =>
             orden.mesa?.toString() === mesa._id?.toString() &&
-            ['Recepcion', 'Preparacion', 'Surtida'].includes(orden.estatus)
+            orden.estatus === 'Finalizada' // Only show orders ready for payment
         );
 
         const ordenesConDetalles: OrdenCompleta[] = ordenesMesa.map(orden => ({
@@ -106,17 +106,17 @@ const Cobrar: React.FC = () => {
   const handleFinalizarOrden = async (orden: OrdenCompleta) => {
     setProcessing(true);
     try {
-      const response = await apiService.updateOrdenStatus(orden._id?.toString() || '', 'Finalizada');
+      const response = await apiService.updateOrdenStatus(orden._id?.toString() || '', 'Pagada');
       if (response.success) {
-        setSuccess('Orden finalizada exitosamente');
+        setSuccess('Orden cobrada exitosamente');
         if (selectedMesa) {
           await loadOrdenesActivas(selectedMesa);
         }
       } else {
-        setError('Error al finalizar la orden');
+        setError('Error al cobrar la orden');
       }
     } catch (err) {
-      setError('Error al finalizar la orden');
+      setError('Error al cobrar la orden');
     } finally {
       setProcessing(false);
     }
@@ -249,8 +249,8 @@ const Cobrar: React.FC = () => {
                     <button onClick={() => handlePrintTicket(orden)} className="flex-1 px-3 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors flex items-center justify-center">
                       <Printer className="w-4 h-4 mr-1" /> Imprimir
                     </button>
-                    <button onClick={() => handleFinalizarOrden(orden)} disabled={processing || orden.estatus !== 'Surtida'} className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 mr-1" /> Finalizar
+                    <button onClick={() => handleFinalizarOrden(orden)} disabled={processing} className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 mr-1" /> Cobrar
                     </button>
                   </div>
                 </div>
