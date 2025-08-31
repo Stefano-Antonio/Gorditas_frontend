@@ -55,7 +55,7 @@ const Cobrar: React.FC = () => {
         const ordenesMesa = ordenesArray.filter(
           (orden: Orden) =>
             orden.mesa?.toString() === mesa._id?.toString() &&
-            ['Recepcion', 'Preparacion', 'Surtida'].includes(orden.estatus)
+            orden.estatus === 'Finalizada' // Only show orders ready for payment
         );
 
         const ordenesConDetalles: OrdenCompleta[] = ordenesMesa.map(orden => ({
@@ -106,17 +106,17 @@ const Cobrar: React.FC = () => {
   const handleFinalizarOrden = async (orden: OrdenCompleta) => {
     setProcessing(true);
     try {
-      const response = await apiService.updateOrdenStatus(orden._id?.toString() || '', 'Finalizada');
+      const response = await apiService.updateOrdenStatus(orden._id?.toString() || '', 'Pagada');
       if (response.success) {
-        setSuccess('Orden finalizada exitosamente');
+        setSuccess('Orden cobrada exitosamente');
         if (selectedMesa) {
           await loadOrdenesActivas(selectedMesa);
         }
       } else {
-        setError('Error al finalizar la orden');
+        setError('Error al cobrar la orden');
       }
     } catch (err) {
-      setError('Error al finalizar la orden');
+      setError('Error al cobrar la orden');
     } finally {
       setProcessing(false);
     }
@@ -165,10 +165,10 @@ const Cobrar: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cobrar</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cobrar</h1>
           <p className="text-gray-600 mt-1">Procesa el pago y finaliza las órdenes</p>
         </div>
       </div>
@@ -176,33 +176,33 @@ const Cobrar: React.FC = () => {
       {error && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">{error}</div>}
       {success && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">{success}</div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Table Selection */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-6">
-            <Users className="w-5 h-5 text-orange-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Seleccionar Mesa</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+            <Users className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Seleccionar Mesa</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {mesas?.filter(m => m.activo).map(mesa => (
               <button
                 key={mesa._id?.toString()}
                 onClick={() => loadOrdenesActivas(mesa)}
-                className={`p-4 rounded-lg border-2 text-center transition-colors ${
+                className={`p-3 sm:p-4 rounded-lg border-2 text-center transition-colors ${
                   selectedMesa?._id === mesa._id
                     ? 'border-orange-500 bg-orange-50 text-orange-700'
                     : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
                 }`}
               >
-                <div className="text-lg font-semibold">Mesa {mesa.numero}</div>
-                <div className="text-sm text-gray-600">{mesa.capacidad} personas</div>
+                <div className="text-base sm:text-lg font-semibold">Mesa {mesa.numero}</div>
+                <div className="text-xs sm:text-sm text-gray-600">{mesa.capacidad} personas</div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Order Details */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center space-x-2 mb-6">
             <CreditCard className="w-5 h-5 text-orange-600" />
             <h2 className="text-lg font-semibold text-gray-900">
@@ -249,8 +249,8 @@ const Cobrar: React.FC = () => {
                     <button onClick={() => handlePrintTicket(orden)} className="flex-1 px-3 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors flex items-center justify-center">
                       <Printer className="w-4 h-4 mr-1" /> Imprimir
                     </button>
-                    <button onClick={() => handleFinalizarOrden(orden)} disabled={processing || orden.estatus !== 'Surtida'} className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 mr-1" /> Finalizar
+                    <button onClick={() => handleFinalizarOrden(orden)} disabled={processing} className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 mr-1" /> Cobrar
                     </button>
                   </div>
                 </div>

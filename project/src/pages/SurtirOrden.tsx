@@ -34,10 +34,11 @@ const SurtirOrden: React.FC = () => {
 
       if (ordenesRes.success) {
         const ordenesArray = Array.isArray(ordenesRes.data) ? ordenesRes.data : [];
-        const ordenesPreparacion = ordenesArray.filter((orden: Orden) => 
-          orden.estatus === 'Preparacion'
+        // Show orders in "Recepcion" (ready to start) and "Preparacion" (in progress) status
+        const ordenesParaSurtir = ordenesArray.filter((orden: Orden) => 
+          orden.estatus === 'Recepcion' || orden.estatus === 'Preparacion'
         );
-        setOrdenes(ordenesPreparacion);
+        setOrdenes(ordenesParaSurtir);
       }
 
       if (mesasRes.success) {
@@ -50,7 +51,30 @@ const SurtirOrden: React.FC = () => {
     }
   };
 
-  const handleSurtirOrden = async (ordenId: string) => {
+  const handleIniciarPreparacion = async (ordenId: string) => {
+    setUpdating(ordenId);
+    setError('');
+    
+    try {
+      const response = await apiService.updateOrdenStatus(ordenId, 'Preparacion');
+      
+      if (response.success) {
+        setSuccess('Orden en preparación');
+        await loadData(); // Refresh the list
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError('Error al iniciar preparación');
+      }
+    } catch (error) {
+      setError('Error al iniciar preparación');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleCompletarOrden = async (ordenId: string) => {
     setUpdating(ordenId);
     setError('');
     
@@ -64,10 +88,10 @@ const SurtirOrden: React.FC = () => {
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError('Error al surtir la orden');
+        setError('Error al completar la orden');
       }
     } catch (error) {
-      setError('Error al surtir la orden');
+      setError('Error al completar la orden');
     } finally {
       setUpdating(null);
     }
@@ -110,18 +134,18 @@ const SurtirOrden: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Surtir Órdenes</h1>
-          <p className="text-gray-600 mt-1">Gestiona las órdenes en preparación</p>
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 sm:mb-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Preparar Órdenes</h1>
+          <p className="text-gray-600 mt-1">Gestiona las órdenes recibidas y en preparación</p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-lg px-3 sm:px-4 py-2 shadow-sm border border-gray-200">
             <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-orange-600" />
-              <span className="text-sm font-medium text-gray-700">
-                {ordenes.length} órdenes en preparación
+              <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+              <span className="text-xs sm:text-sm font-medium text-gray-700">
+                {ordenes.length} órdenes pendientes
               </span>
             </div>
           </div>
@@ -144,12 +168,12 @@ const SurtirOrden: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
           <div className="text-center">
             <ChefHat className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No hay órdenes en preparación</h2>
-            <p className="text-gray-600">Todas las órdenes están al día</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No hay órdenes pendientes</h2>
+            <p className="text-gray-600">No hay órdenes listas para preparar</p>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {ordenes.map((orden) => {
             const mesa = getMesaInfo(orden.mesa);
             const timeElapsed = getTimeElapsed(orden.fecha);
@@ -158,7 +182,7 @@ const SurtirOrden: React.FC = () => {
             return (
               <div
                 key={orden._id}
-                className={`bg-white rounded-xl shadow-sm border-2 p-6 transition-all hover:shadow-md ${priorityColor}`}
+                className={`bg-white rounded-xl shadow-sm border-2 p-4 sm:p-6 transition-all hover:shadow-md ${priorityColor}`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -179,8 +203,12 @@ const SurtirOrden: React.FC = () => {
                       <Timer className="w-4 h-4" />
                       <span>{timeElapsed}</span>
                     </div>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                      {orden.estatus}
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      orden.estatus === 'Recepcion' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {orden.estatus === 'Recepcion' ? 'Lista para preparar' : 'En preparación'}
                     </span>
                   </div>
                 </div>
@@ -213,23 +241,43 @@ const SurtirOrden: React.FC = () => {
                   )}
                 </div>
 
-                <button
-                  onClick={() => handleSurtirOrden(orden._id!)}
-                  disabled={updating === orden._id}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                >
-                  {updating === orden._id ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Surtiendo...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Marcar como Surtida
-                    </>
-                  )}
-                </button>
+                {orden.estatus === 'Recepcion' ? (
+                  <button
+                    onClick={() => handleIniciarPreparacion(orden._id!)}
+                    disabled={updating === orden._id}
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  >
+                    {updating === orden._id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Iniciando...
+                      </>
+                    ) : (
+                      <>
+                        <ChefHat className="w-5 h-5 mr-2" />
+                        Iniciar Preparación
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleCompletarOrden(orden._id!)}
+                    disabled={updating === orden._id}
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  >
+                    {updating === orden._id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Completando...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        Marcar como Surtida
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             );
           })}
