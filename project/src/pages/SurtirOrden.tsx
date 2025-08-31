@@ -134,17 +134,17 @@ const SurtirOrden: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Preparar Órdenes</h1>
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 sm:mb-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Preparar Órdenes</h1>
           <p className="text-gray-600 mt-1">Gestiona las órdenes recibidas y en preparación</p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="bg-white rounded-lg px-4 py-2 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-lg px-3 sm:px-4 py-2 shadow-sm border border-gray-200">
             <div className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-orange-600" />
-              <span className="text-sm font-medium text-gray-700">
+              <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+              <span className="text-xs sm:text-sm font-medium text-gray-700">
                 {ordenes.length} órdenes pendientes
               </span>
             </div>
@@ -173,7 +173,7 @@ const SurtirOrden: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {ordenes.map((orden) => {
             const mesa = getMesaInfo(orden.mesa);
             const timeElapsed = getTimeElapsed(orden.fecha);
@@ -182,7 +182,7 @@ const SurtirOrden: React.FC = () => {
             return (
               <div
                 key={orden._id}
-                className={`bg-white rounded-xl shadow-sm border-2 p-6 transition-all hover:shadow-md ${priorityColor}`}
+                className={`bg-white rounded-xl shadow-sm border-2 p-4 sm:p-6 transition-all hover:shadow-md ${priorityColor}`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">

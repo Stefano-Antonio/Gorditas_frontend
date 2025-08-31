@@ -165,10 +165,10 @@ const Cobrar: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cobrar</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cobrar</h1>
           <p className="text-gray-600 mt-1">Procesa el pago y finaliza las órdenes</p>
         </div>
       </div>
@@ -176,33 +176,33 @@ const Cobrar: React.FC = () => {
       {error && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">{error}</div>}
       {success && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">{success}</div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Table Selection */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-6">
-            <Users className="w-5 h-5 text-orange-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Seleccionar Mesa</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+            <Users className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Seleccionar Mesa</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {mesas?.filter(m => m.activo).map(mesa => (
               <button
                 key={mesa._id?.toString()}
                 onClick={() => loadOrdenesActivas(mesa)}
-                className={`p-4 rounded-lg border-2 text-center transition-colors ${
+                className={`p-3 sm:p-4 rounded-lg border-2 text-center transition-colors ${
                   selectedMesa?._id === mesa._id
                     ? 'border-orange-500 bg-orange-50 text-orange-700'
                     : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
                 }`}
               >
-                <div className="text-lg font-semibold">Mesa {mesa.numero}</div>
-                <div className="text-sm text-gray-600">{mesa.capacidad} personas</div>
+                <div className="text-base sm:text-lg font-semibold">Mesa {mesa.numero}</div>
+                <div className="text-xs sm:text-sm text-gray-600">{mesa.capacidad} personas</div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Order Details */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center space-x-2 mb-6">
             <CreditCard className="w-5 h-5 text-orange-600" />
             <h2 className="text-lg font-semibold text-gray-900">
